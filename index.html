@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Меню">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Меню на неделю</title>
+<style>
+:root{
+  --bg:#f2f2f7;--card:#ffffff;--text:#111114;--muted:#6b6b73;--line:#e5e5ea;
+  --accent:#f26b1d;--accent-soft:#fff0e5;--ok:#2fb35a;--bar:rgba(249,249,251,.92);
+  --p:#2f7cf6;--f:#e6a100;--c:#2fb35a;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#000;--card:#1c1c1e;--text:#f2f2f7;--muted:#9a9aa1;--line:#2c2c2e;
+  --accent:#ff8a3d;--accent-soft:#3a2414;--ok:#38c766;--bar:rgba(22,22,24,.92);
+  --p:#5b9bff;--f:#ffc23d;--c:#38c766}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+header,main{max-width:640px;margin:0 auto}
+header{padding:calc(env(safe-area-inset-top) + 16px) 16px 4px}
+h1{font-size:30px;margin:0;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:15px;margin-top:2px}
+main{padding:0 16px calc(96px + env(safe-area-inset-bottom))}
+.sec{font-size:20px;font-weight:700;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.sec small{font-size:14px;color:var(--muted);font-weight:500}
+.card{background:var(--card);border-radius:16px;padding:14px 14px 12px;margin-bottom:12px}
+.slot{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:700}
+.title{font-size:18px;font-weight:700;margin:2px 0 10px;line-height:1.25}
+.macros{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.mac{background:var(--bg);border-radius:12px;padding:8px 10px}
+.mac b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.mac .kc{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.mac .kc small{font-size:13px;font-weight:600;color:var(--muted)}
+.bju{display:flex;gap:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.bju .p{color:var(--p)}.bju .f{color:var(--f)}.bju .c{color:var(--c)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:2px 0 4px;width:64px}
+th:first-child{text-align:left;width:auto}
+td{padding:7px 0;border-top:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+td:first-child{text-align:left;white-space:normal;padding-right:8px}
+.note{font-size:13px;color:var(--muted);margin-top:6px}
+details{margin-top:8px;border-top:1px solid var(--line);padding-top:8px}
+summary{color:var(--accent);font-weight:600;font-size:15px;list-style:none;cursor:pointer;padding:2px 0}
+summary::-webkit-details-marker{display:none}
+summary::after{content:" ›";display:inline-block;transition:transform .2s}
+details[open] summary::after{transform:rotate(90deg)}
+.steps{margin:10px 0 2px;padding:0;list-style:none;counter-reset:s}
+.steps li{position:relative;padding:0 0 12px 36px;font-size:15px;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;display:grid;place-items:center}
+.steps b{font-weight:700}
+.tip{background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:14px;margin:4px 0 6px}
+.tip b{color:var(--accent)}
+.today-badge{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;font-size:12px;font-weight:700;padding:2px 9px;margin-left:6px;vertical-align:middle}
+.guide ul{margin:8px 0 4px;padding-left:20px;font-size:15px}
+.guide li{margin-bottom:6px}
+
+/* shopping */
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 4px}
+.progress i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .25s}
+.toolbar{display:flex;gap:8px;margin:12px 0 4px}
+.btn{flex:1;border:0;border-radius:12px;padding:11px 10px;font:600 15px/1 inherit;font-family:inherit;background:var(--card);color:var(--accent);cursor:pointer}
+.btn.on{background:var(--accent);color:#fff}
+.btn.confirm{background:#e5484d;color:#fff}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:12px 0 14px}
+.day{border:0;border-radius:12px;background:var(--card);color:var(--text);padding:8px 0 6px;font:600 15px/1.1 inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;position:relative}
+.day small{font-size:11px;color:var(--muted);font-weight:600}
+.day.now::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.day.on{background:var(--accent);color:#fff}
+.day.on small{color:rgba(255,255,255,.85)}
+.day.on.now::after{background:#fff}
+.group{background:var(--card);border-radius:16px;overflow:hidden;margin-bottom:12px}
+.gtitle{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:12px 14px 4px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none;min-height:52px}
+.gtitle + .row{border-top:0}
+.box{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:all .15s}
+.row.done .box{background:var(--ok);border-color:var(--ok)}
+.box svg{opacity:0;width:14px;height:14px}
+.row.done .box svg{opacity:1}
+.name{flex:1;font-size:16px}
+.qty{color:var(--muted);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.row.done .name,.row.done .qty{color:var(--muted);text-decoration:line-through}
+.del{border:0;background:none;color:var(--muted);font-size:22px;padding:0 4px;cursor:pointer}
+.add{display:flex;gap:8px;margin:4px 0 12px}
+.add input{flex:1;border:0;border-radius:12px;padding:12px;font:16px inherit;font-family:inherit;background:var(--card);color:var(--text);min-width:0}
+.add button{border:0;border-radius:12px;padding:0 18px;background:var(--accent);color:#fff;font:600 20px inherit;font-family:inherit}
+.empty{text-align:center;color:var(--muted);padding:20px 0}
+
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--bar);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;color:var(--muted);padding:8px 0 6px;font:600 11px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h">Сегодня</h1>
+  <div class="sub" id="hs"></div>
+</header>
+<main id="app"></main>
+<nav>
+  <button data-tab="today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>Сегодня</button>
+  <button data-tab="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Меню</button>
+  <button data-tab="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20.5" r="1"/><circle cx="17" cy="20.5" r="1"/></svg>Покупки</button>
+</nav>
+
+<script>
+/* ===== Продукты: на 100 г сырого/сухого веса — ккал, белки, жиры, углеводы ===== */
+const ING = {
+  chicken:  {n:'Куриное филе (грудка)', c:'Мясо', k:113, p:23.6, f:1.9, u:0.4},
+  buckwheat:{n:'Гречка', c:'Крупы и макароны', k:313, p:12.6, f:3.3, u:62},
+  rice:     {n:'Рис', c:'Крупы и макароны', k:344, p:6.7, f:0.7, u:78.9},
+  pasta:    {n:'Макароны (твёрдые сорта)', c:'Крупы и макароны', k:350, p:12, f:1.5, u:71},
+  potato:   {n:'Картофель', c:'Овощи', k:77, p:2, f:0.4, u:16.3},
+  cucumber: {n:'Огурцы', c:'Овощи', k:15, p:0.8, f:0.1, u:2.8},
+  cabbage:  {n:'Капуста белокочанная', c:'Овощи', k:27, p:1.8, f:0.1, u:4.7},
+  carrot:   {n:'Морковь', c:'Овощи', k:35, p:1.3, f:0.1, u:6.9},
+  onion:    {n:'Лук репчатый', c:'Овощи', k:41, p:1.4, f:0, u:8.2},
+  zucchini: {n:'Кабачок', c:'Овощи', k:24, p:0.6, f:0.3, u:4.6},
+  broccoli: {n:'Брокколи заморож.', c:'Заморозка', k:34, p:2.8, f:0.4, u:6.6},
+  vegmix:   {n:'Овощная смесь заморож.', c:'Заморозка', k:40, p:2, f:0.3, u:7},
+  beans:    {n:'Стручковая фасоль заморож.', c:'Заморозка', k:31, p:2, f:0.2, u:6},
+  oil:      {n:'Растительное масло', c:'Прочее', k:899, p:0, f:99.9, u:0},
+  tompaste: {n:'Томатная паста', c:'Прочее', k:99, p:4.8, f:0, u:19},
+  soy:      {n:'Соевый соус', c:'Прочее', k:50, p:6, f:0, u:6},
+  flakes:   {n:'Кукурузные хлопья без сахара', c:'Прочее', k:370, p:7.5, f:1, u:83},
+};
+
+/* В шагах: {key} — вес продукта на всю партию, {key*2} — число (например, мл воды) */
+const RICE = 'Рис ({rice}) промыть до прозрачной воды. Залить {rice*2} мл холодной воды, посолить (½ ч. л.), довести до кипения, убавить огонь до минимума и варить под крышкой 15 мин. Снять с огня и 10 мин не открывать.';
+const BUCK = 'Гречку ({buckwheat}) промыть, залить {buckwheat*2} мл воды, посолить (½ ч. л.). Довести до кипения, огонь на минимум, варить под крышкой 15 мин. Снять с огня, 5 мин не открывать.';
+
+const MENUS = [
+  {id:1, days:'Пн–Вт', count:2, dow:[1,2], meals:[
+    {slot:'Обед', t:'Грудка в чесночно-соевом маринаде + гречка + огурцы',
+     items:[['chicken',150,200],['buckwheat',60,90],['cucumber',150,150],['soy',10,10],['oil',5,5]],
+     extra:['Чеснок','Паприка','Чёрный перец','Пергамент'],
+     time:'35 мин',
+     steps:[
+      'Духовку разогреть до <b>200°</b>.',
+      'Филе ({chicken}) разрезать вдоль на 2 тонких пласта, накрыть плёнкой и слегка отбить до толщины ~1,5 см — пропечётся равномерно и останется сочным.',
+      'Маринад: соевый соус ({soy}), масло ({oil}), 3 зубчика чеснока через пресс, 1 ч. л. паприки, перец (соль не нужна — соус солёный). Обмазать курицу и оставить на 15 мин (можно с вечера в холодильнике).',
+      'Выложить на противень с пергаментом, запекать <b>18–20 мин</b>. Дать полежать 5 мин и только потом резать.',
+      BUCK,
+      'Огурцы ({cucumber}) резать прямо перед едой — заранее нарезанные дают сок.'
+     ]},
+    {slot:'Ужин', t:'Стир-фрай с курицей и капустой + рис',
+     items:[['chicken',150,200],['rice',55,80],['cabbage',100,100],['carrot',50,50],['soy',15,15],['oil',5,5]],
+     extra:['Чеснок','Имбирь (по желанию)'],
+     time:'30 мин',
+     steps:[
+      RICE,
+      'Филе ({chicken}) нарезать полосками толщиной с палец. Капусту ({cabbage}) тонко нашинковать, морковь ({carrot}) — соломкой или на корейской тёрке.',
+      'Сковороду раскалить на сильном огне, налить масло ({oil}). Курицу выложить в один слой (не влезает — жарь в два захода), первые 2 мин не мешать, всего <b>5–6 мин</b>.',
+      'Добавить морковь, капусту и 2 зубчика чеснока (и тёртый имбирь), жарить <b>4–5 мин</b> — капуста должна остаться хрусткой.',
+      'Влить соевый соус ({soy}), перемешать 1 мин. Не соли — соус уже солёный.'
+     ]},
+  ]},
+  {id:2, days:'Ср–Чт', count:2, dow:[3,4], meals:[
+    {slot:'Обед', t:'Грудка с картофелем на противне + салат из капусты',
+     items:[['chicken',150,200],['potato',250,350],['cabbage',150,150],['oil',5,5]],
+     extra:['Паприка','Сушёный чеснок','Соль, чёрный перец','Уксус или лимон'],
+     time:'50 мин',
+     steps:[
+      'Духовку разогреть до <b>200°</b>.',
+      'Картофель ({potato}) хорошо помыть (чистить не обязательно), нарезать дольками ~2 см.',
+      'Филе ({chicken}) нарезать кусками 3–4 см.',
+      'Смешать масло ({oil}), 2 ч. л. паприки, 1 ч. л. сушёного чеснока, 1 ч. л. соли, перец. Половиной обвалять картофель, половиной — курицу (в разных мисках).',
+      'Картофель выложить на противень и запекать <b>15 мин</b>. Затем добавить курицу и запекать ещё <b>20–25 мин</b>, на середине перемешать. Так картошка успеет, а курица не пересохнет.',
+      'Капусту ({cabbage}) тонко нашинковать, посолить щепоткой и помять руками до сока. Заправить 1 ч. л. уксуса или лимонным соком.'
+     ]},
+    {slot:'Ужин', t:'Грудка, тушённая с кабачком и луком + рис',
+     items:[['chicken',150,200],['rice',55,80],['zucchini',100,100],['onion',50,50],['oil',5,5]],
+     extra:['Итальянские травы','Чеснок'],
+     time:'30 мин',
+     steps:[
+      RICE,
+      'Лук ({onion}) мелко нарезать, кабачок ({zucchini}) — кубиком 1,5 см, филе ({chicken}) — кубиком 2 см.',
+      'В сковороде на масле ({oil}) обжарить лук <b>3 мин</b>, добавить курицу — ещё <b>5 мин</b>.',
+      'Добавить кабачок, 2 зубчика чеснока, 1 ч. л. итальянских трав, соль, 50 мл воды. Тушить под крышкой на среднем огне <b>10 мин</b>.'
+     ]},
+  ]},
+  {id:3, days:'Пт–Сб', count:2, dow:[5,6], meals:[
+    {slot:'Обед', t:'Макароны с курицей в томатном соусе',
+     items:[['chicken',150,200],['pasta',50,75],['onion',50,50],['carrot',50,50],['tompaste',20,20],['oil',5,5]],
+     extra:['Базилик сушёный','Чеснок','Сахар (щепотка)'],
+     time:'30 мин',
+     steps:[
+      'Лук ({onion}) мелко нарезать, морковь ({carrot}) натереть, филе ({chicken}) нарезать кусочками 2 см.',
+      'На масле ({oil}) обжарить лук и морковь <b>4 мин</b>, добавить курицу — ещё <b>5 мин</b>.',
+      'Добавить томатную пасту ({tompaste}), 2 зубчика чеснока, 200 мл воды, 1 ч. л. базилика, соль и щепотку сахара (убирает кислоту). Тушить <b>7–8 мин</b> до загустения.',
+      'Макароны ({pasta}) варить в подсоленной воде на 1 мин меньше, чем написано на пачке. Откинуть.',
+      'Хранить соус и макароны лучше раздельно, смешивать при разогреве.'
+     ]},
+    {slot:'Ужин', t:'Пряная грудка (куркума и паприка) + рис + брокколи',
+     items:[['chicken',150,200],['rice',55,80],['broccoli',150,150],['oil',5,5]],
+     extra:['Куркума','Паприка','Молотый кориандр (по желанию)','Соль','Кефир (по желанию)'],
+     time:'35 мин',
+     steps:[
+      'Духовку разогреть до <b>200°</b>.',
+      'Филе ({chicken}) обмазать маслом ({oil}), 1 ч. л. куркумы, 1 ч. л. паприки, ½ ч. л. кориандра и ½ ч. л. соли. Готовый «карри» не бери — в нём часто есть горчичное семя. Для сочности добавь 1–2 ст. л. кефира и оставь на 15 мин.',
+      'Запекать на пергаменте <b>20–25 мин</b> (готово, когда сок при проколе прозрачный). Дать отдохнуть 5 мин.',
+      RICE,
+      'Брокколи ({broccoli}) бросить в кипящую подсоленную воду на <b>6–7 мин</b> (свежую — 4 мин), откинуть.'
+     ]},
+  ]},
+  {id:4, days:'Вс', count:1, dow:[0], meals:[
+    {slot:'Обед', t:'Наггетсы в кукурузной панировке + картофель',
+     items:[['chicken',150,200],['flakes',15,15],['potato',160,260],['vegmix',150,150],['oil',5,5]],
+     extra:['Яйцо (1 шт.)','Паприка','Соль'],
+     time:'45 мин',
+     steps:[
+      'Духовку разогреть до <b>200°</b>, противень смазать маслом ({oil}).',
+      'Картофель ({potato}) нарезать дольками, посолить и поставить в духовку на <b>15 мин</b>.',
+      'Хлопья ({flakes}) раздавить в пакете скалкой в крошку, добавить 1 ч. л. паприки и ½ ч. л. соли.',
+      'Филе ({chicken}) нарезать брусками 2×5 см. Обмакнуть во взбитое яйцо, затем обвалять в крошке.',
+      'Добавить наггетсы к картошке и запекать ещё <b>18–20 мин</b>, на середине перевернуть.',
+      'Овощную смесь ({vegmix}) потушить на сковороде под крышкой без масла <b>7–8 мин</b>.'
+     ]},
+    {slot:'Ужин', t:'Грудка в томатах с травами + гречка + фасоль',
+     items:[['chicken',150,200],['buckwheat',55,85],['beans',150,150],['tompaste',20,20],['oil',5,5]],
+     extra:['Чеснок','Прованские травы','Сахар (щепотка)'],
+     time:'30 мин',
+     steps:[
+      BUCK,
+      'Филе ({chicken}) нарезать кубиком 2 см и обжарить на масле ({oil}) с 2 зубчиками чеснока <b>5 мин</b>.',
+      'Добавить томатную пасту ({tompaste}), 150 мл воды, 1 ч. л. прованских трав, соль, щепотку сахара. Тушить под крышкой <b>10 мин</b>.',
+      'Фасоль ({beans}) добавить прямо в сковороду на последние 5–6 мин или отварить отдельно.'
+     ]},
+  ]},
+];
+
+const CATS = ['Мясо','Овощи','Заморозка','Крупы и макароны','Прочее','Специи и мелочи','Своё'];
+const DAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+
+/* ===== Хранилище ===== */
+function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let tab = load('m.tab','today');
+let checked = load('m.checked',{});
+let custom = load('m.custom',[]);
+let hide = load('m.hide',false);
+
+/* ===== Утилиты ===== */
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fmt(g){
+  if(g>=1000){const kg=Math.round(g/100)/10;return String(kg).replace('.',',')+' кг'}
+  return Math.round(g)+' г';
+}
+function macro(items,i){
+  const r={k:0,p:0,f:0,u:0};
+  items.forEach(it=>{const x=ING[it[0]],g=it[i]/100;r.k+=x.k*g;r.p+=x.p*g;r.f+=x.f*g;r.u+=x.u*g});
+  return {k:Math.round(r.k),p:Math.round(r.p),f:Math.round(r.f),u:Math.round(r.u)};
+}
+function fillStep(s, m, menu){
+  return s.replace(/\{(\w+)(?:\*([\d.]+))?\}/g,(_,k,mul)=>{
+    const it = m.items.find(i=>i[0]===k); if(!it) return '';
+    const total = (it[1]+it[2])*menu.count;
+    return mul ? String(Math.round(total*Number(mul)/10)*10) : '<b>'+fmt(total)+'</b>';
+  });
+}
+
+/* ===== Карточка блюда ===== */
+function macBox(who, m){
+  return `<div class="mac"><b>${who}</b><div class="kc">${m.k} <small>ккал</small></div>
+    <div class="bju"><span class="p">Б ${m.p}</span><span class="f">Ж ${m.f}</span><span class="c">У ${m.u}</span></div></div>`;
+}
+function mealCard(m, menu, openRecipe){
+  const rows = m.items.map(([k,a,b])=>`<tr><td>${esc(ING[k].n)}</td><td>${a} г</td><td>${b} г</td></tr>`).join('');
+  const ch = m.items.find(i=>i[0]==='chicken');
+  const side = m.items.find(i=>['rice','buckwheat','pasta','potato'].includes(i[0]));
+  const pct = it => Math.round(it[1]/(it[1]+it[2])*100);
+  const days = menu.count===2?'2 дня':'1 день';
+  return `<div class="card">
+    <div class="slot">${m.slot} · ⏱ ${m.time}</div>
+    <div class="title">${esc(m.t)}</div>
+    <div class="macros">${macBox('Она',macro(m.items,1))}${macBox('Ты',macro(m.items,2))}</div>
+    <table><tr><th>Порция (сырой вес)</th><th>Она</th><th>Ты</th></tr>${rows}</table>
+    <div class="note">+ ${esc(m.extra.join(', ').toLowerCase())}</div>
+    <details ${openRecipe?'open':''}><summary>Рецепт — партия на ${days} на двоих</summary>
+      <ol class="steps">${m.steps.map(s=>`<li>${fillStep(s,m,menu)}</li>`).join('')}</ol>
+      <div class="tip"><b>Как делить готовое:</b> взвесь и раздели по весу — курица: ей ${pct(ch)}%, тебе ${100-pct(ch)}%${side?`; гарнир: ей ${pct(side)}%, тебе ${100-pct(side)}%`:''}. Овощи — поровну.${menu.count===2?' Потом раздели каждую часть пополам на 2 дня.':''}</div>
+    </details>
+  </div>`;
+}
+
+/* ===== Экраны ===== */
+const cap = s => s[0].toUpperCase()+s.slice(1);
+function setHead(t,s){document.getElementById('h').textContent=t;document.getElementById('hs').textContent=s}
+
+const SHORT = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const WEEK = [1,2,3,4,5,6,0];
+let selDay = new Date().getDay();
+function renderToday(){
+  const today = new Date().getDay();
+  const d = selDay;
+  const menu = MENUS.find(m=>m.dow.includes(d));
+  setHead(d===today?'Сегодня':cap(DAYS[d]), `${d===today?cap(DAYS[d])+' · ':''}меню ${menu.id} (${menu.days})`);
+  const nd = (d+1)%7, next = MENUS.find(m=>m.dow.includes(nd));
+  let html = `<div class="days">${WEEK.map(w=>`<button class="day ${w===d?'on':''} ${w===today?'now':''}" data-day="${w}"><span>${SHORT[w]}</span><small>М${MENUS.find(m=>m.dow.includes(w)).id}</small></button>`).join('')}</div>`;
+  if(menu.dow[0]===d) html += `<div class="tip" style="margin-top:12px"><b>День готовки:</b> рецепты ниже уже рассчитаны на всю партию.</div>`;
+  html += menu.meals.map(m=>mealCard(m,menu,menu.dow[0]===d)).join('');
+  if(next.id!==menu.id) html += `<div class="note" style="text-align:center;margin:4px 0 12px">${d===today?'Завтра':'На следующий день'} (${DAYS[nd]}) — меню ${next.id}, нужна новая партия</div>`;
+  return html;
+}
+
+const GUIDE = `<div class="card guide"><details><summary>Как готовить быстрее и дешевле</summary>
+<ul>
+<li><b>Порядок:</b> сначала включи духовку и поставь крупу, пока она варится — режь и готовь курицу. Обед и ужин на 2 дня выходят за ~1–1,5 часа.</li>
+<li><b>Сочная грудка:</b> не передерживай по времени и дай ей полежать 5 мин после готовки.</li>
+<li><b>Хранение:</b> в контейнерах в холодильнике 2–3 дня — партии на 2 дня как раз хватает.</li>
+<li><b>Экономия:</b> бери филе в больших упаковках или замороженное по акции, крупы — в больших пачках, брокколи и фасоль — замороженные, они дешевле свежих и не портятся.</li>
+<li><b>Аллергия (горчица, орехи):</b> в меню их нет, но проверяй состав и строчку «может содержать следы» у кукурузных хлопьев, соевого соуса, смесей специй (прованские / итальянские травы) и томатной пасты. Горчица часто прячется в готовых смесях специй и соусах.</li>
+<li><b>Вес:</b> всё в рецептах — в сыром виде, взвешивай до готовки.</li>
+</ul></details></div>`;
+
+function renderMenu(){
+  const d = new Date().getDay();
+  setHead('Меню', 'Обед и ужин · она ~450, ты ~600 ккал');
+  return GUIDE + MENUS.map(menu=>`<div class="sec"><span>Меню ${menu.id}${menu.dow.includes(d)?'<span class="today-badge">сегодня</span>':''}</span><small>${menu.days}</small></div>`
+    + menu.meals.map(m=>mealCard(m,menu,false)).join('')).join('');
+}
+
+function shopItems(){
+  const sum = {}, extras = new Set();
+  MENUS.forEach(menu=>menu.meals.forEach(m=>{
+    m.items.forEach(([k,a,b])=>{sum[k]=(sum[k]||0)+(a+b)*menu.count});
+    m.extra.forEach(e=>extras.add(e));
+  }));
+  const list = Object.entries(sum).map(([k,g])=>({id:'i:'+k, n:ING[k].n, q:fmt(g), c:ING[k].c}));
+  [...extras].forEach(e=>list.push({id:'s:'+e, n:e, q:'', c:'Специи и мелочи'}));
+  custom.forEach(x=>list.push({id:'c:'+x.id, n:x.n, q:'', c:'Своё', custom:x.id}));
+  return list;
+}
+function renderShop(){
+  const list = shopItems();
+  const done = list.filter(x=>checked[x.id]).length;
+  setHead('Покупки', `На неделю на двоих · взято ${done} из ${list.length}`);
+  let html = `<div class="progress"><i style="width:${list.length?done/list.length*100:0}%"></i></div>
+    <div class="toolbar">
+      <button class="btn ${hide?'on':''}" data-act="hide">${hide?'Показать взятое':'Скрыть взятое'}</button>
+      <button class="btn" data-act="reset">Сбросить</button>
+    </div>
+    <form class="add"><input id="addIn" placeholder="Добавить своё…" enterkeyhint="done" autocomplete="off"><button type="submit">+</button></form>`;
+  let any = false;
+  CATS.forEach(cat=>{
+    let items = list.filter(x=>x.c===cat);
+    if(hide) items = items.filter(x=>!checked[x.id]);
+    if(!items.length) return;
+    any = true;
+    items.sort((a,b)=>(!!checked[a.id])-(!!checked[b.id]));
+    html += `<div class="group"><div class="gtitle">${cat}</div>` + items.map(x=>`
+      <div class="row ${checked[x.id]?'done':''}" data-id="${esc(x.id)}">
+        <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        <span class="name">${esc(x.n)}</span>
+        ${x.q?`<span class="qty">${x.q}</span>`:''}
+        ${x.custom?`<button class="del" data-del="${x.custom}" aria-label="Удалить">×</button>`:''}
+      </div>`).join('') + `</div>`;
+  });
+  if(!any) html += `<div class="empty">Всё взято 🎉</div>`;
+  return html;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = tab==='menu'?renderMenu():tab==='shop'?renderShop():renderToday();
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+}
+
+/* ===== События ===== */
+let resetTimer;
+document.querySelector('nav').addEventListener('click',e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.tab==='today' && tab==='today') selDay = new Date().getDay();
+  tab = b.dataset.tab; save('m.tab',tab); render(); window.scrollTo(0,0);
+});
+document.getElementById('app').addEventListener('click',e=>{
+  const del = e.target.closest('[data-del]');
+  if(del){
+    e.stopPropagation();
+    const id = Number(del.dataset.del);
+    custom = custom.filter(x=>x.id!==id); delete checked['c:'+id];
+    save('m.custom',custom); save('m.checked',checked); render(); return;
+  }
+  const row = e.target.closest('.row');
+  if(row){
+    const id = row.dataset.id;
+    if(checked[id]) delete checked[id]; else checked[id]=1;
+    save('m.checked',checked); render(); return;
+  }
+  const day = e.target.closest('[data-day]');
+  if(day){selDay = Number(day.dataset.day); render(); return}
+  const act = e.target.closest('button[data-act]');
+  if(!act) return;
+  if(act.dataset.act==='hide'){hide=!hide; save('m.hide',hide); render()}
+  if(act.dataset.act==='reset'){
+    if(act.classList.contains('confirm')){
+      clearTimeout(resetTimer); checked={}; save('m.checked',checked); render();
+    } else {
+      act.classList.add('confirm'); act.textContent='Точно сбросить?';
+      resetTimer = setTimeout(()=>{act.classList.remove('confirm'); act.textContent='Сбросить'},3000);
+    }
+  }
+});
+document.getElementById('app').addEventListener('submit',e=>{
+  e.preventDefault();
+  const inp = document.getElementById('addIn'); const n = inp.value.trim(); if(!n) return;
+  custom.push({id:Date.now(), n}); save('m.custom',custom); render();
+  document.getElementById('addIn').focus();
+});
+
+render();
+</script>
+</body>
+</html>
