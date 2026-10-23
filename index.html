@@ -99,9 +99,33 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--bar);
 nav button{flex:1;border:0;background:none;color:var(--muted);padding:8px 0 6px;font:600 11px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
 nav button svg{width:24px;height:24px}
 nav button.on{color:var(--accent)}
+
+body:not(.ready) header, body:not(.ready) main, body:not(.ready) nav{display:none}
+body.ready #login{display:none}
+#login{min-height:100vh;display:grid;place-items:center;padding:24px 16px calc(24px + env(safe-area-inset-bottom))}
+#loginForm{width:100%;max-width:360px;background:var(--card);border-radius:20px;padding:28px 20px 22px;text-align:center}
+.lg-icon{font-size:40px;line-height:1}
+#loginForm h2{margin:10px 0 4px;font-size:24px;font-weight:800}
+.lg-sub{margin:0 0 18px;color:var(--muted);font-size:15px}
+#loginForm input{display:block;width:100%;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:16px inherit;font-family:inherit;background:var(--bg);color:var(--text)}
+#loginForm button{width:100%;margin-top:4px;border:0;border-radius:12px;padding:14px;background:var(--accent);color:#fff;font:700 16px inherit;font-family:inherit;cursor:pointer}
+#loginForm button:disabled{opacity:.6}
+.lg-err{min-height:20px;margin-top:10px;color:#e5484d;font-size:14px;font-weight:600}
+.logout{display:block;width:100%;margin:20px 0 8px;border:0;border-radius:12px;padding:12px;background:var(--card);color:#e5484d;font:600 15px inherit;font-family:inherit;cursor:pointer}
 </style>
 </head>
 <body>
+<div id="login">
+  <form id="loginForm" autocomplete="on">
+    <div class="lg-icon">🍗</div>
+    <h2>Меню на неделю</h2>
+    <p class="lg-sub">Войди, чтобы открыть меню</p>
+    <input id="lgUser" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Логин" required>
+    <input id="lgPass" name="password" type="password" autocomplete="current-password" placeholder="Пароль" required>
+    <button type="submit" id="lgBtn">Войти</button>
+    <div id="lgErr" class="lg-err"></div>
+  </form>
+</div>
 <header>
   <h1 id="h">Сегодня</h1>
   <div class="sub" id="hs"></div>
@@ -114,130 +138,9 @@ nav button.on{color:var(--accent)}
 </nav>
 
 <script>
-/* ===== Продукты: на 100 г сырого/сухого веса — ккал, белки, жиры, углеводы ===== */
-const ING = {
-  chicken:  {n:'Куриное филе (грудка)', c:'Мясо', k:113, p:23.6, f:1.9, u:0.4},
-  buckwheat:{n:'Гречка', c:'Крупы и макароны', k:313, p:12.6, f:3.3, u:62},
-  rice:     {n:'Рис', c:'Крупы и макароны', k:344, p:6.7, f:0.7, u:78.9},
-  pasta:    {n:'Макароны (твёрдые сорта)', c:'Крупы и макароны', k:350, p:12, f:1.5, u:71},
-  potato:   {n:'Картофель', c:'Овощи', k:77, p:2, f:0.4, u:16.3},
-  cucumber: {n:'Огурцы', c:'Овощи', k:15, p:0.8, f:0.1, u:2.8},
-  cabbage:  {n:'Капуста белокочанная', c:'Овощи', k:27, p:1.8, f:0.1, u:4.7},
-  carrot:   {n:'Морковь', c:'Овощи', k:35, p:1.3, f:0.1, u:6.9},
-  onion:    {n:'Лук репчатый', c:'Овощи', k:41, p:1.4, f:0, u:8.2},
-  zucchini: {n:'Кабачок', c:'Овощи', k:24, p:0.6, f:0.3, u:4.6},
-  broccoli: {n:'Брокколи заморож.', c:'Заморозка', k:34, p:2.8, f:0.4, u:6.6},
-  vegmix:   {n:'Овощная смесь заморож.', c:'Заморозка', k:40, p:2, f:0.3, u:7},
-  beans:    {n:'Стручковая фасоль заморож.', c:'Заморозка', k:31, p:2, f:0.2, u:6},
-  oil:      {n:'Растительное масло', c:'Прочее', k:899, p:0, f:99.9, u:0},
-  tompaste: {n:'Томатная паста', c:'Прочее', k:99, p:4.8, f:0, u:19},
-  soy:      {n:'Соевый соус', c:'Прочее', k:50, p:6, f:0, u:6},
-  flakes:   {n:'Кукурузные хлопья без сахара', c:'Прочее', k:370, p:7.5, f:1, u:83},
-};
-
-/* В шагах: {key} — вес продукта на всю партию, {key*2} — число (например, мл воды) */
-const RICE = 'Рис ({rice}) промыть до прозрачной воды. Залить {rice*2} мл холодной воды, посолить (½ ч. л.), довести до кипения, убавить огонь до минимума и варить под крышкой 15 мин. Снять с огня и 10 мин не открывать.';
-const BUCK = 'Гречку ({buckwheat}) промыть, залить {buckwheat*2} мл воды, посолить (½ ч. л.). Довести до кипения, огонь на минимум, варить под крышкой 15 мин. Снять с огня, 5 мин не открывать.';
-
-const MENUS = [
-  {id:1, days:'Пн–Вт', count:2, dow:[1,2], meals:[
-    {slot:'Обед', t:'Грудка в чесночно-соевом маринаде + гречка + огурцы',
-     items:[['chicken',150,200],['buckwheat',60,90],['cucumber',150,150],['soy',10,10],['oil',5,5]],
-     extra:['Чеснок','Паприка','Чёрный перец','Пергамент'],
-     time:'35 мин',
-     steps:[
-      'Духовку разогреть до <b>200°</b>.',
-      'Филе ({chicken}) разрезать вдоль на 2 тонких пласта, накрыть плёнкой и слегка отбить до толщины ~1,5 см — пропечётся равномерно и останется сочным.',
-      'Маринад: соевый соус ({soy}), масло ({oil}), 3 зубчика чеснока через пресс, 1 ч. л. паприки, перец (соль не нужна — соус солёный). Обмазать курицу и оставить на 15 мин (можно с вечера в холодильнике).',
-      'Выложить на противень с пергаментом, запекать <b>18–20 мин</b>. Дать полежать 5 мин и только потом резать.',
-      BUCK,
-      'Огурцы ({cucumber}) резать прямо перед едой — заранее нарезанные дают сок.'
-     ]},
-    {slot:'Ужин', t:'Стир-фрай с курицей и капустой + рис',
-     items:[['chicken',150,200],['rice',55,80],['cabbage',100,100],['carrot',50,50],['soy',15,15],['oil',5,5]],
-     extra:['Чеснок','Имбирь (по желанию)'],
-     time:'30 мин',
-     steps:[
-      RICE,
-      'Филе ({chicken}) нарезать полосками толщиной с палец. Капусту ({cabbage}) тонко нашинковать, морковь ({carrot}) — соломкой или на корейской тёрке.',
-      'Сковороду раскалить на сильном огне, налить масло ({oil}). Курицу выложить в один слой (не влезает — жарь в два захода), первые 2 мин не мешать, всего <b>5–6 мин</b>.',
-      'Добавить морковь, капусту и 2 зубчика чеснока (и тёртый имбирь), жарить <b>4–5 мин</b> — капуста должна остаться хрусткой.',
-      'Влить соевый соус ({soy}), перемешать 1 мин. Не соли — соус уже солёный.'
-     ]},
-  ]},
-  {id:2, days:'Ср–Чт', count:2, dow:[3,4], meals:[
-    {slot:'Обед', t:'Грудка с картофелем на противне + салат из капусты',
-     items:[['chicken',150,200],['potato',250,350],['cabbage',150,150],['oil',5,5]],
-     extra:['Паприка','Сушёный чеснок','Соль, чёрный перец','Уксус или лимон'],
-     time:'50 мин',
-     steps:[
-      'Духовку разогреть до <b>200°</b>.',
-      'Картофель ({potato}) хорошо помыть (чистить не обязательно), нарезать дольками ~2 см.',
-      'Филе ({chicken}) нарезать кусками 3–4 см.',
-      'Смешать масло ({oil}), 2 ч. л. паприки, 1 ч. л. сушёного чеснока, 1 ч. л. соли, перец. Половиной обвалять картофель, половиной — курицу (в разных мисках).',
-      'Картофель выложить на противень и запекать <b>15 мин</b>. Затем добавить курицу и запекать ещё <b>20–25 мин</b>, на середине перемешать. Так картошка успеет, а курица не пересохнет.',
-      'Капусту ({cabbage}) тонко нашинковать, посолить щепоткой и помять руками до сока. Заправить 1 ч. л. уксуса или лимонным соком.'
-     ]},
-    {slot:'Ужин', t:'Грудка, тушённая с кабачком и луком + рис',
-     items:[['chicken',150,200],['rice',55,80],['zucchini',100,100],['onion',50,50],['oil',5,5]],
-     extra:['Итальянские травы','Чеснок'],
-     time:'30 мин',
-     steps:[
-      RICE,
-      'Лук ({onion}) мелко нарезать, кабачок ({zucchini}) — кубиком 1,5 см, филе ({chicken}) — кубиком 2 см.',
-      'В сковороде на масле ({oil}) обжарить лук <b>3 мин</b>, добавить курицу — ещё <b>5 мин</b>.',
-      'Добавить кабачок, 2 зубчика чеснока, 1 ч. л. итальянских трав, соль, 50 мл воды. Тушить под крышкой на среднем огне <b>10 мин</b>.'
-     ]},
-  ]},
-  {id:3, days:'Пт–Сб', count:2, dow:[5,6], meals:[
-    {slot:'Обед', t:'Макароны с курицей в томатном соусе',
-     items:[['chicken',150,200],['pasta',50,75],['onion',50,50],['carrot',50,50],['tompaste',20,20],['oil',5,5]],
-     extra:['Базилик сушёный','Чеснок','Сахар (щепотка)'],
-     time:'30 мин',
-     steps:[
-      'Лук ({onion}) мелко нарезать, морковь ({carrot}) натереть, филе ({chicken}) нарезать кусочками 2 см.',
-      'На масле ({oil}) обжарить лук и морковь <b>4 мин</b>, добавить курицу — ещё <b>5 мин</b>.',
-      'Добавить томатную пасту ({tompaste}), 2 зубчика чеснока, 200 мл воды, 1 ч. л. базилика, соль и щепотку сахара (убирает кислоту). Тушить <b>7–8 мин</b> до загустения.',
-      'Макароны ({pasta}) варить в подсоленной воде на 1 мин меньше, чем написано на пачке. Откинуть.',
-      'Хранить соус и макароны лучше раздельно, смешивать при разогреве.'
-     ]},
-    {slot:'Ужин', t:'Пряная грудка (куркума и паприка) + рис + брокколи',
-     items:[['chicken',150,200],['rice',55,80],['broccoli',150,150],['oil',5,5]],
-     extra:['Куркума','Паприка','Молотый кориандр (по желанию)','Соль','Кефир (по желанию)'],
-     time:'35 мин',
-     steps:[
-      'Духовку разогреть до <b>200°</b>.',
-      'Филе ({chicken}) обмазать маслом ({oil}), 1 ч. л. куркумы, 1 ч. л. паприки, ½ ч. л. кориандра и ½ ч. л. соли. Готовый «карри» не бери — в нём часто есть горчичное семя. Для сочности добавь 1–2 ст. л. кефира и оставь на 15 мин.',
-      'Запекать на пергаменте <b>20–25 мин</b> (готово, когда сок при проколе прозрачный). Дать отдохнуть 5 мин.',
-      RICE,
-      'Брокколи ({broccoli}) бросить в кипящую подсоленную воду на <b>6–7 мин</b> (свежую — 4 мин), откинуть.'
-     ]},
-  ]},
-  {id:4, days:'Вс', count:1, dow:[0], meals:[
-    {slot:'Обед', t:'Наггетсы в кукурузной панировке + картофель',
-     items:[['chicken',150,200],['flakes',15,15],['potato',160,260],['vegmix',150,150],['oil',5,5]],
-     extra:['Яйцо (1 шт.)','Паприка','Соль'],
-     time:'45 мин',
-     steps:[
-      'Духовку разогреть до <b>200°</b>, противень смазать маслом ({oil}).',
-      'Картофель ({potato}) нарезать дольками, посолить и поставить в духовку на <b>15 мин</b>.',
-      'Хлопья ({flakes}) раздавить в пакете скалкой в крошку, добавить 1 ч. л. паприки и ½ ч. л. соли.',
-      'Филе ({chicken}) нарезать брусками 2×5 см. Обмакнуть во взбитое яйцо, затем обвалять в крошке.',
-      'Добавить наггетсы к картошке и запекать ещё <b>18–20 мин</b>, на середине перевернуть.',
-      'Овощную смесь ({vegmix}) потушить на сковороде под крышкой без масла <b>7–8 мин</b>.'
-     ]},
-    {slot:'Ужин', t:'Грудка в томатах с травами + гречка + фасоль',
-     items:[['chicken',150,200],['buckwheat',55,85],['beans',150,150],['tompaste',20,20],['oil',5,5]],
-     extra:['Чеснок','Прованские травы','Сахар (щепотка)'],
-     time:'30 мин',
-     steps:[
-      BUCK,
-      'Филе ({chicken}) нарезать кубиком 2 см и обжарить на масле ({oil}) с 2 зубчиками чеснока <b>5 мин</b>.',
-      'Добавить томатную пасту ({tompaste}), 150 мл воды, 1 ч. л. прованских трав, соль, щепотку сахара. Тушить под крышкой <b>10 мин</b>.',
-      'Фасоль ({beans}) добавить прямо в сковороду на последние 5–6 мин или отварить отдельно.'
-     ]},
-  ]},
-];
+/* Данные меню зашифрованы (AES-256-GCM, ключ из логина и пароля через PBKDF2) */
+let ING = {}, MENUS = [], GUIDE = '';
+const ENC = {"salt":"HAPQYP1KdewXyLvHZq8Y3Q==","iv":"kgsOIJ9pPuv+VCl6","iter":250000,"ct":"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"};
 
 const CATS = ['Мясо','Овощи','Заморозка','Крупы и макароны','Прочее','Специи и мелочи','Своё'];
 const DAYS = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
@@ -313,21 +216,13 @@ function renderToday(){
   return html;
 }
 
-const GUIDE = `<div class="card guide"><details><summary>Как готовить быстрее и дешевле</summary>
-<ul>
-<li><b>Порядок:</b> сначала включи духовку и поставь крупу, пока она варится — режь и готовь курицу. Обед и ужин на 2 дня выходят за ~1–1,5 часа.</li>
-<li><b>Сочная грудка:</b> не передерживай по времени и дай ей полежать 5 мин после готовки.</li>
-<li><b>Хранение:</b> в контейнерах в холодильнике 2–3 дня — партии на 2 дня как раз хватает.</li>
-<li><b>Экономия:</b> бери филе в больших упаковках или замороженное по акции, крупы — в больших пачках, брокколи и фасоль — замороженные, они дешевле свежих и не портятся.</li>
-<li><b>Аллергия (горчица, орехи):</b> в меню их нет, но проверяй состав и строчку «может содержать следы» у кукурузных хлопьев, соевого соуса, смесей специй (прованские / итальянские травы) и томатной пасты. Горчица часто прячется в готовых смесях специй и соусах.</li>
-<li><b>Вес:</b> всё в рецептах — в сыром виде, взвешивай до готовки.</li>
-</ul></details></div>`;
+
 
 function renderMenu(){
   const d = new Date().getDay();
   setHead('Меню', 'Обед и ужин · она ~450, ты ~600 ккал');
   return GUIDE + MENUS.map(menu=>`<div class="sec"><span>Меню ${menu.id}${menu.dow.includes(d)?'<span class="today-badge">сегодня</span>':''}</span><small>${menu.days}</small></div>`
-    + menu.meals.map(m=>mealCard(m,menu,false)).join('')).join('');
+    + menu.meals.map(m=>mealCard(m,menu,false)).join('')).join('') + `<button class="logout" data-act="logout">Выйти</button>`;
 }
 
 function shopItems(){
@@ -401,6 +296,7 @@ document.getElementById('app').addEventListener('click',e=>{
   if(day){selDay = Number(day.dataset.day); render(); return}
   const act = e.target.closest('button[data-act]');
   if(!act) return;
+  if(act.dataset.act==='logout'){try{localStorage.removeItem('m.key')}catch(e){} location.reload(); return}
   if(act.dataset.act==='hide'){hide=!hide; save('m.hide',hide); render()}
   if(act.dataset.act==='reset'){
     if(act.classList.contains('confirm')){
@@ -418,7 +314,44 @@ document.getElementById('app').addEventListener('submit',e=>{
   document.getElementById('addIn').focus();
 });
 
-render();
+/* ===== Вход ===== */
+const b64d = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+const b64e = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+async function unlock(key){
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64d(ENC.iv)}, key, b64d(ENC.ct));
+  const d = JSON.parse(new TextDecoder().decode(pt));
+  ING = d.ING; MENUS = d.MENUS; GUIDE = d.GUIDE;
+}
+function start(){ document.body.classList.add('ready'); render(); }
+async function boot(){
+  if(!window.crypto || !crypto.subtle){ document.getElementById('lgErr').textContent='Открой сайт по https'; return; }
+  let saved = null; try{ saved = localStorage.getItem('m.key') }catch(e){}
+  if(saved){
+    try{
+      const key = await crypto.subtle.importKey('raw', b64d(saved), 'AES-GCM', true, ['decrypt']);
+      await unlock(key); return start();
+    }catch(e){ try{localStorage.removeItem('m.key')}catch(_){} }
+  }
+}
+document.getElementById('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const btn = document.getElementById('lgBtn'), err = document.getElementById('lgErr');
+  const user = document.getElementById('lgUser').value.trim().toLowerCase();
+  const pass = document.getElementById('lgPass').value;
+  btn.disabled = true; btn.textContent = 'Проверяю…'; err.textContent = '';
+  try{
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(user+':'+pass), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64d(ENC.salt), iterations:ENC.iter, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, true, ['decrypt']);
+    await unlock(key);
+    try{ localStorage.setItem('m.key', b64e(await crypto.subtle.exportKey('raw', key))) }catch(_){}
+    start();
+  }catch(ex){
+    err.textContent = 'Неверный логин или пароль';
+    btn.disabled = false; btn.textContent = 'Войти';
+  }
+});
+
+boot();
 </script>
 </body>
 </html>
